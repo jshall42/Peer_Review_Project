@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react"
 import type { FormEvent } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate} from "react-router-dom"
 import Swal from "sweetalert2"
 
 function RegistrationPage(){
+    const navigate = useNavigate()
     // State to store input values
 
     // Account related fields
@@ -154,7 +155,7 @@ function RegistrationPage(){
 
     const validateContact = (contact: string, contactMethod: string) => {
         if (contact.trim() === "") {
-            setContactMethodError("")
+            setContactError("")
             return false
         }
         
@@ -233,7 +234,50 @@ function RegistrationPage(){
                 return
             }
 
-
+            fetch("http://localhost:8080/peerreview/user", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    email: email,  
+                    password: password,
+                    firstName: firstName,
+                    lastName: lastName,
+                    contactType: contactMethod,
+                    contactInfo: contact,
+                    userType: type
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.message || data.error || "Registration failed")
+                    })
+                }
+                return response.json()
+            })
+            .then(() => {
+                Swal.fire({
+                    title: "Success!",
+                    html: "<p class='mb-0 mt-0'>Registration Successful</p>",
+                    icon: "success",
+                    allowOutsideClick: false,
+                    confirmButtonText: "Continue to Login"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        navigate("/login")
+                    }
+                })
+            })
+            .catch(error => {
+                console.error("Registration error:", error)
+                Swal.fire({
+                    title: "Registration Failed",
+                    html: `<p class='mb-0 mt-0'>${error.message}</p>`,
+                    icon: "error"
+                })
+            })
             
     }
 

@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react"
 import type { FormEvent } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import Swal from "sweetalert2"
 
 function LoginPage() {
     // State to store email and password input values
+    const navigate = useNavigate()
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [emailError, setEmailError] = useState("")
@@ -72,14 +73,53 @@ function LoginPage() {
             return
         }
         
-        // successful login alert (for demonstration)
-        Swal.fire({
-            title: "Login Successful",
-            text: "You are being redirected...",
-            icon: "success",
-            timer: 2000,
-            showConfirmButton: false
-        })
+        // send login info to backend
+            fetch("http://localhost:8080/peerreview/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ email: email, password: password })
+            })
+            // gets the data and makes it a js object
+            .then(res => res.json())
+            // takes the data and sees if the backend sent a success or error
+            .then(data => {
+                if (data.status === "success") {
+                    Swal.fire({
+                        title: "Success!",
+                        html: `<p class='mb-0 mt-0'>Welcome, ${data.user.firstName} (${data.user.userType})</p>`,
+                        icon: "success",
+                        allowOutsideClick: false,
+                        confirmButtonText: "Continue"
+                        // makes sure they clicked continue and after they do it will take them to the teacher or student dashboard
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            if(data.userType == "teacher"){
+                                //navigate("/teacher")
+                                console.log("Login")
+                            }
+                            else{
+                                //navigate("/student")
+                            }
+                        }
+                    })
+                } else {
+                    Swal.fire({
+                        title: "Login Failed",
+                        html: "<p class='mb-0 mt-0'>Invalid username or password</p>",
+                        icon: "error"
+                    })
+                }
+            })
+            .catch(err => {
+                console.error("Login request failed:", err)
+                Swal.fire({
+                    title: "Error",
+                    html: "<p class='mb-0 mt-0'>An error occurred during login</p>",
+                    icon: "error"
+                })
+            })
     }
 
     return (

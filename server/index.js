@@ -13,7 +13,7 @@ app.use(express.json())
 
 const intSalt = 10
 
-app.post('/peerreview/user', async (req, res) => {
+app.post('/peerreview/user', async (req, res, next) => {
     try {
         // get info from frontend
         let strEmail = req.body.email.trim().toLowerCase()
@@ -80,6 +80,60 @@ app.post('/peerreview/user', async (req, res) => {
         res.status(500).json({
             status: "error",
             message: "Server error during registration: " + error.message
+        })
+    }
+})
+
+app.post('/peerreview/login', async (req, res, next) => {
+    try {
+        // getting the user info from the front
+        let strEmail = req.body.email.trim().toLowerCase()
+        let strPassword = req.body.password
+        
+
+        //selecting the user from the db to see if they exist
+        const checkUser = await db.query(`SELECT * FROM tblUsers WHERE Email = $1`, [strEmail])
+
+        if (checkUser.rows.length === 0) {
+            return res.status(400).json({
+                status: "error",
+                message: "Email or Password is invalid."
+            })
+        }
+
+        const user = checkUser.rows[0]
+        
+        const isMatch = await bcrypt.compare(strPassword, user.password)
+
+        if(!isMatch){
+            return res.status(401).json({
+                status: "error",
+                message: "Email or Password is invalid."
+            })
+        }
+
+        await db.query(`UPDATE tblUsers SET LastLoginDate = $1 WHERE Email = $2`, [
+            new Date().toISOString(),
+            strEmail
+        ])
+
+        res.status(200).json({
+            status: "success",
+            message: "Login successful",
+            user: {
+                uid: user.uid,
+                email: user.email,
+                firstName: user.firstname,
+                lastName: user.lastname,
+                userType: user.usertype
+            }
+        })
+        
+    } catch (error) {
+        console.error("Uncaught error in login:", error)
+        res.status(500).json({
+            status: "error",
+            message: "Server error during login: " + error.message
         })
     }
 })

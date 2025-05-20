@@ -96,11 +96,10 @@ function LoginPage() {
                     }).then((result) => {
                         if (result.isConfirmed) {
                             if(data.userType == "teacher"){
-                                //navigate("/teacher")
-                                console.log("Login")
+                                navigate("/teacher")
                             }
                             else{
-                                //navigate("/student")
+                                navigate("/student")
                             }
                         }
                     })

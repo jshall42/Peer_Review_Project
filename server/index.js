@@ -189,14 +189,14 @@ app.post('/peerreview/course', async (req, res, next) => {
     }
 })
 
-app.post('/peerreview/enroll', (req, res, next) => {
+app.post('/peerreview/enroll', async (req, res, next) => {
     try {
         // getting the user email and course code from the front end
-        const userEmail = req.body.email.trim().toLowerCase()
-        const courseCode = req.body.code.trim()
+        const strUserID = req.body.userID.trim()
+        const strCourseID = req.body.courseID.trim()
 
         // check if the user email and course code are provided
-        if (!userEmail || !courseCode) {
+        if (!strCourseID || !strUserID) {
             return res.status(400).json({
                 status: "error",
                 message: "User email and course code are required"
@@ -204,25 +204,16 @@ app.post('/peerreview/enroll', (req, res, next) => {
         }
 
         // SQL query to enroll the user in the course
-        const enrollSql = `
-            INSERT INTO tblEnrollments (UserID, CourseID)
-            VALUES (?, ?)
-        `
+        await db.query(`
+            INSERT INTO tblEnrollments (CourseID, UserID)
+            VALUES ($1, $2)
+        `, [strCourseID, strUserID])
 
-        db.run(enrollSql, [userEmail, courseCode], function (err) {
-            if (err) {
-                console.error("Error enrolling in course:", err)
-                return res.status(500).json({
-                    status: "error",
-                    message: "Failed to enroll in course"
-                })
-            }
-
-            res.status(201).json({
-                status: "success",
-                message: "Successfully enrolled in course"
-            })
+        res.status(201).json({
+            status: "success",
+            message: "Successfully enrolled in course"
         })
+        
     } catch (error) {
         console.error("Uncaught error in /peerreview/enroll:", error)
         res.status(500).json({
@@ -231,7 +222,6 @@ app.post('/peerreview/enroll', (req, res, next) => {
         })
     }
 })
-
 app.get('/peerreview/courses', async (req, res, next) => {
     try {
         // Get and sanitize the user email
@@ -248,18 +238,20 @@ app.get('/peerreview/courses', async (req, res, next) => {
         // Run query to fetch courses where the user is either instructor or enrolled student
         const { rows } = await db.query(`
             SELECT 
-                c.coursename,
-                c.coursenumber,
-                c.courseid,
-                c.coursesection,
-                c.courseterm,
-                u.firstname || ' ' || u.lastname AS instructorname
-            FROM tblcourses c
-            JOIN tblusers u ON c.instructoremail = u.email
-            WHERE c.instructoremail = $1
-                OR c.courseid IN (
-                SELECT courseid FROM tblenrollments WHERE userid = $2
-                )
+            c.coursename,
+            c.coursenumber,
+            c.courseid,
+            c.coursesection,
+            c.courseterm,
+            u.firstname || ' ' || u.lastname AS instructorname
+        FROM tblcourses c
+        JOIN tblusers u ON c.instructoremail = u.email
+        WHERE c.instructoremail = $1
+        OR c.courseid IN (
+            SELECT courseid 
+            FROM tblenrollments 
+            WHERE userid = (SELECT userid FROM tblusers WHERE email = $2)
+        )
             `, [userEmail, userEmail])
 
         // Respond with course data

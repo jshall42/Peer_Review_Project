@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import { NavBar, HomePage, LoginPage, RegistrationPage, ForgotPassword } from './components'
-import TeacherView from './components/TeacherView'
+import { NavBar, HomePage, LoginPage, RegistrationPage, ForgotPassword, TeacherView, StudentView } from './components'
 
 function App() {
   return (
@@ -13,7 +12,7 @@ function App() {
           <Route path="/forgotpassword" element={<ForgotPassword />} />
           <Route path="/registration" element={<RegistrationPage />} />
           <Route path="/teacher" element={<TeacherView />} />
-          {/* <Route path="/student" element={<RegistrationPage />} /> */}
+          <Route path="/student" element={<StudentView />} />
         </Routes>
       </div>
     </Router>

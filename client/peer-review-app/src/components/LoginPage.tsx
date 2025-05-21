@@ -87,6 +87,7 @@ function LoginPage() {
             .then(data => {
                 if (data.status === "success") {
                     sessionStorage.setItem("userEmail", email)
+                    sessionStorage.setItem('userID', data.user.uid)
                     Swal.fire({
                         title: "Success!",
                         html: `<p class='mb-0 mt-0'>Welcome, ${data.user.firstName} (${data.user.userType})</p>`,

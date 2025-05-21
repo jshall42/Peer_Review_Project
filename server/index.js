@@ -138,6 +138,145 @@ app.post('/peerreview/login', async (req, res, next) => {
     }
 })
 
+app.post('/peerreview/course', async (req, res, next) => {
+    try {
+        // getting the course info from the front end
+        let strCourseName = req.body.courseName
+        let strCourseNumber = req.body.courseNumber
+        let strCourseSection = req.body.courseSection
+        let strCourseTerm = req.body.courseTerm
+        let strStartDate = req.body.startDate
+        let strEndDate = req.body.endDate
+        let strCourseID = uuidv4().substring(0,5)
+        let strInstructorEmail = req.body.instructorEmail
+
+        // check the user input
+        if (!strCourseName || !strCourseNumber || !strCourseSection || !strCourseTerm ||
+            !strStartDate || !strEndDate || !strCourseID) {
+            return res.status(400).json({
+                status: "error",
+                message: "All course fields are required"
+            })
+        }
+
+        strCourseName = strCourseName.trim()
+        strCourseNumber = strCourseNumber.trim()
+        strCourseSection = strCourseSection.trim()
+        strCourseTerm = strCourseTerm.trim()
+        strStartDate = strStartDate.trim()
+        strEndDate = strEndDate.trim()
+        strCourseID = strCourseID.trim()
+        strInstructorEmail = strInstructorEmail.trim()
+
+        // add course to data base
+        await db.query(`
+            INSERT INTO tblCourses (CourseID, CourseName, CourseNumber, CourseSection, CourseTerm, StartDate, EndDate, InstructorEmail)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        `, [strCourseID, strCourseName, strCourseNumber, strCourseSection, strCourseTerm, strStartDate, strEndDate, strInstructorEmail])
+
+
+        res.status(201).json({
+            status: "success",
+            message: "Course was added"
+        })
+
+    } catch (error) {
+        console.error("Uncaught error in /peerreview/course:", error)
+        res.status(500).json({
+            status: "error",
+            message: "Server error while creating course: " + error.message
+        })
+    }
+})
+
+app.post('/peerreview/enroll', (req, res, next) => {
+    try {
+        // getting the user email and course code from the front end
+        const userEmail = req.body.email.trim().toLowerCase()
+        const courseCode = req.body.code.trim()
+
+        // check if the user email and course code are provided
+        if (!userEmail || !courseCode) {
+            return res.status(400).json({
+                status: "error",
+                message: "User email and course code are required"
+            })
+        }
+
+        // SQL query to enroll the user in the course
+        const enrollSql = `
+            INSERT INTO tblEnrollments (UserID, CourseID)
+            VALUES (?, ?)
+        `
+
+        db.run(enrollSql, [userEmail, courseCode], function (err) {
+            if (err) {
+                console.error("Error enrolling in course:", err)
+                return res.status(500).json({
+                    status: "error",
+                    message: "Failed to enroll in course"
+                })
+            }
+
+            res.status(201).json({
+                status: "success",
+                message: "Successfully enrolled in course"
+            })
+        })
+    } catch (error) {
+        console.error("Uncaught error in /peerreview/enroll:", error)
+        res.status(500).json({
+            status: "error",
+            message: "Server error while enrolling in course: " + error.message
+        })
+    }
+})
+
+app.get('/peerreview/courses', (req, res, next) => {
+    // getting the user email from the front end
+    const userEmail = req.query.userEmail.trim().toLowerCase()
+
+    // check if the user email is provided
+    if (!userEmail) {
+        return res.status(400).json({
+            status: "error",
+            message: "User email is required"
+        })
+    }
+
+    // SQL query to get courses for the user
+    // This query fetches courses where the user is either an instructor or a student
+    const getCoursesSql = `
+        SELECT 
+            c.CourseName,
+            c.CourseNumber, 
+            c.CourseCode, 
+            c.CourseSection, 
+            c.CourseTerm, 
+            u.FirstName || ' ' || u.LastName AS InstructorName
+        FROM tblCourse c
+        JOIN tblUsers u ON c.UserEmail = u.Email
+        WHERE c.UserEmail = ? OR c.CourseCode IN (
+            SELECT CourseID FROM tblEnrollments WHERE UserID = ?
+        )
+    `
+
+    db.all(getCoursesSql, [userEmail, userEmail], (err, rows) => {
+        if (err) {
+            console.error("Error fetching courses:", err)
+            return res.status(500).json({
+                status: "error",
+                message: "Failed to fetch courses"
+            })
+        }
+
+        res.status(200).json({
+            status: "success",
+            courses: rows
+        })
+    })
+})
+
 app.listen(port, () => {
     console.log(`Server is listening on port ${port}`)
 })

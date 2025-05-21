@@ -86,6 +86,7 @@ function LoginPage() {
             // takes the data and sees if the backend sent a success or error
             .then(data => {
                 if (data.status === "success") {
+                    sessionStorage.setItem("userEmail", email)
                     Swal.fire({
                         title: "Success!",
                         html: `<p class='mb-0 mt-0'>Welcome, ${data.user.firstName} (${data.user.userType})</p>`,
@@ -95,7 +96,7 @@ function LoginPage() {
                         // makes sure they clicked continue and after they do it will take them to the teacher or student dashboard
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            if(data.userType == "teacher"){
+                            if(data.user.userType == "teacher"){
                                 navigate("/teacher")
                             }
                             else{

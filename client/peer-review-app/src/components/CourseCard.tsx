@@ -10,7 +10,7 @@ interface Course {
     instructorname: string
 }
 
-function CourseCard() {
+function CourseCard({ refresh }: { refresh: boolean }) {
     const [courses, setCourses] = useState<Course[]>([])
 
 
@@ -42,7 +42,7 @@ function CourseCard() {
         }
 
         fetchCourses()
-    }, [])
+    },  [refresh])
 
     return (
         <>

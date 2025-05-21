@@ -2,12 +2,12 @@ import { useEffect, useState } from "react"
 import Swal from "sweetalert2"
 
 interface Course {
-    CourseName: string
-    CourseNumber: string
-    CourseCode: string
-    CourseSection: string
-    CourseTerm: string
-    InstructorName: string
+    coursename: string
+    coursenumber: string
+    courseid: string
+    coursesection: string
+    courseterm: string
+    instructorname: string
 }
 
 function CourseCard() {
@@ -15,14 +15,14 @@ function CourseCard() {
 
 
     useEffect(() => {
-        const userEmail = localStorage.getItem("userEmail")
+        const userEmail = sessionStorage.getItem("userEmail")
         if (!userEmail) {
             console.error("No user email found in localStorage.")
             return
         }
         const fetchCourses = async () => {
             try {
-                const response = await fetch(`http://localhost:8000/peerreview/courses?userEmail=${encodeURIComponent(userEmail)}`, {
+                const response = await fetch(`http://localhost:8080/peerreview/courses?userEmail=${encodeURIComponent(userEmail)}`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json"
@@ -35,7 +35,7 @@ function CourseCard() {
                 }
 
                 const data = await response.json()
-                setCourses(data)
+                setCourses(data.courses)
             } catch (error: any) {
                 Swal.fire("Error", error.message, "error")
             }
@@ -49,11 +49,11 @@ function CourseCard() {
             {courses.map((course, index) => (
                 <div className="col-md-4 mb-4" key={index}>
                     <button className="btn w-100 text-start p-3 shadow-sm border-0 bg-white">
-                        <h5 className="mb-1">{course.CourseName} {course.CourseNumber}</h5>
-                        <p className="mb-0">Course Code: {course.CourseCode}</p>
-                        <p className="mb-0">Section: {course.CourseSection}</p>
-                        <p className="mb-0">Term: {course.CourseTerm}</p>
-                        <p className="mb-0">Instructor: {course.InstructorName}</p>
+                        <h5 className="mb-1">{course.coursename} {course.coursenumber}</h5>
+                        <p className="mb-0">Course Code: {course.courseid}</p>
+                        <p className="mb-0">Section: {course.coursesection}</p>
+                        <p className="mb-0">Term: {course.courseterm}</p>
+                        <p className="mb-0">Instructor: {course.instructorname}</p>
                     </button>
                 </div>
             ))}

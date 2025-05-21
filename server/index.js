@@ -232,49 +232,49 @@ app.post('/peerreview/enroll', (req, res, next) => {
     }
 })
 
-app.get('/peerreview/courses', (req, res, next) => {
-    // getting the user email from the front end
-    const userEmail = req.query.userEmail.trim().toLowerCase()
+app.get('/peerreview/courses', async (req, res, next) => {
+    try {
+        // Get and sanitize the user email
+        const userEmail = req.query.userEmail?.trim().toLowerCase()
 
-    // check if the user email is provided
-    if (!userEmail) {
-        return res.status(400).json({
-            status: "error",
-            message: "User email is required"
-        })
-    }
-
-    // SQL query to get courses for the user
-    // This query fetches courses where the user is either an instructor or a student
-    const getCoursesSql = `
-        SELECT 
-            c.CourseName,
-            c.CourseNumber, 
-            c.CourseCode, 
-            c.CourseSection, 
-            c.CourseTerm, 
-            u.FirstName || ' ' || u.LastName AS InstructorName
-        FROM tblCourse c
-        JOIN tblUsers u ON c.UserEmail = u.Email
-        WHERE c.UserEmail = ? OR c.CourseCode IN (
-            SELECT CourseID FROM tblEnrollments WHERE UserID = ?
-        )
-    `
-
-    db.all(getCoursesSql, [userEmail, userEmail], (err, rows) => {
-        if (err) {
-            console.error("Error fetching courses:", err)
-            return res.status(500).json({
+        // Validate email presence
+        if (!userEmail) {
+            return res.status(400).json({
                 status: "error",
-                message: "Failed to fetch courses"
+                message: "User email is required"
             })
         }
 
+        // Run query to fetch courses where the user is either instructor or enrolled student
+        const { rows } = await db.query(`
+            SELECT 
+                c.coursename,
+                c.coursenumber,
+                c.courseid,
+                c.coursesection,
+                c.courseterm,
+                u.firstname || ' ' || u.lastname AS instructorname
+            FROM tblcourses c
+            JOIN tblusers u ON c.instructoremail = u.email
+            WHERE c.instructoremail = $1
+                OR c.courseid IN (
+                SELECT courseid FROM tblenrollments WHERE userid = $2
+                )
+            `, [userEmail, userEmail])
+
+        // Respond with course data
         res.status(200).json({
             status: "success",
             courses: rows
         })
-    })
+
+    } catch (error) {
+        console.error("Uncaught error in /peerreview/courses:", error)
+        res.status(500).json({
+            status: "error",
+            message: "Server error while retrieving courses: " + error.message
+        })
+    }
 })
 
 app.listen(port, () => {

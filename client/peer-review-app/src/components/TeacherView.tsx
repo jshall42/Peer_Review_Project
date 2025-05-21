@@ -2,6 +2,7 @@ import { useState } from "react"
 import {Button, Modal, ModalBody, ModalFooter, Form, Row, Col} from 'react-bootstrap'
 import type { FormEvent } from "react"
 import Swal from "sweetalert2"
+import CourseCard from "./CourseCard"
 
 /* Just learned that there is a React-Bootstrap module that would have made my life easier so thats why the styling of the code will
 look different from Login and Registration. */
@@ -73,6 +74,7 @@ function TeacherView(){
     
     return(
         <>
+        <CourseCard></CourseCard>
         <Button variant="primary" onClick={handleShow}>
             Create Course
         </Button>

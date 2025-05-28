@@ -277,6 +277,39 @@ app.get('/peerreview/courses', async (req, res, next) => {
     }
 })
 
+app.get('/peerreview/enrollment', async (req, res, next) => {
+        try {
+        const courseID = req.query.courseID?.trim()
+
+        if (!courseID) {
+            return res.status(400).json({
+                status: "error",
+                message: "Course ID is required"
+            })
+        }
+
+        // Fetch all students enrolled in the course
+        const { rows } = await db.query(`
+            SELECT u.firstname, u.lastname, u.email
+            FROM tblEnrollments e
+            JOIN tblUsers u ON e.userid = u.uid
+            WHERE e.courseid = $1
+        `, [courseID])
+
+        res.status(200).json({
+            status: "success",
+            students: rows
+        })
+
+    } catch (error) {
+        console.error("Uncaught error in /peerreview/enrollment:", error)
+        res.status(500).json({
+            status: "error",
+            message: "Server error while retrieving students: " + error.message
+        })
+    }
+})
+
 app.listen(port, () => {
     console.log(`Server is listening on port ${port}`)
 })

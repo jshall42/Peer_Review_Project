@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
 import Swal from "sweetalert2"
 
 interface Course {
@@ -10,7 +11,8 @@ interface Course {
     instructorname: string
 }
 
-function CourseCard() {
+function CourseCard({ refresh }: { refresh: boolean }) {
+    const navigate = useNavigate()
     const [courses, setCourses] = useState<Course[]>([])
 
 
@@ -44,11 +46,15 @@ function CourseCard() {
         fetchCourses()
     }, [])
 
+    const openDashboard = (id:string) => {
+        navigate(`/course/${id}/*`)
+    }
+
     return (
         <>
             {courses.map((course, index) => (
                 <div className="col-md-4 mb-4" key={index}>
-                    <button className="btn w-100 text-start p-3 shadow-sm border-0 bg-white">
+                    <button className="btn w-100 text-start p-3 shadow-sm border-0 bg-white" onClick={() => openDashboard(course.courseid)}>
                         <h5 className="mb-1">{course.coursename} {course.coursenumber}</h5>
                         <p className="mb-0">Course Code: {course.courseid}</p>
                         <p className="mb-0">Section: {course.coursesection}</p>

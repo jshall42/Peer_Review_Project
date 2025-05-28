@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import { NavBar, HomePage, LoginPage, RegistrationPage, ForgotPassword } from './components'
-import TeacherView from './components/TeacherView'
+import { NavBar, HomePage, LoginPage, RegistrationPage,
+        ForgotPassword, TeacherView, StudentView, CourseDashboard,
+        EnrollmentTab} from './components'
 
 function App() {
   return (
@@ -8,12 +9,23 @@ function App() {
       <NavBar />
       <div className="container mt-4">
         <Routes>
+          {/* Genral Routes*/}
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/forgotpassword" element={<ForgotPassword />} />
           <Route path="/registration" element={<RegistrationPage />} />
+
+          {/*Teacher Routes */}
           <Route path="/teacher" element={<TeacherView />} />
-          {/* <Route path="/student" element={<RegistrationPage />} /> */}
+          <Route path="/course/:id/*" element={<CourseDashboard />}>
+            <Route path="enrollment" element={<EnrollmentTab />} />
+            <Route path="assesment" element={<EnrollmentTab />} />
+            <Route path="feedback" element={<EnrollmentTab />} />
+            <Route index element={<EnrollmentTab />} />
+          </Route>
+
+          {/*Student Routes */}
+          <Route path="/student" element={<StudentView />} />
         </Routes>
       </div>
     </Router>

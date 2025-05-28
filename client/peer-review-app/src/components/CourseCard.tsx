@@ -44,7 +44,7 @@ function CourseCard({ refresh }: { refresh: boolean }) {
         }
 
         fetchCourses()
-    }, [])
+    }, [refresh])
 
     const openDashboard = (id:string) => {
         navigate(`/course/${id}/*`)

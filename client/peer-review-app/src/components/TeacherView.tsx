@@ -10,6 +10,8 @@ look different from Login and Registration. */
 function TeacherView(){
     const [show, setShow] = useState(false)
     const [validated, setValidated] = useState(false)
+    const [refreshCourses, setRefreshCourses] = useState(false)
+
 
     const handleClose = () => setShow(false)
     const handleShow = () => setShow(true)
@@ -51,6 +53,7 @@ function TeacherView(){
                         confirmButtonText: "Continue"
                     }).then(result => {
                         if(result.isConfirmed){
+                            setRefreshCourses(prev => !prev)
                             handleClose()
                         }
                     })
@@ -74,7 +77,7 @@ function TeacherView(){
     
     return(
         <>
-        <CourseCard></CourseCard>
+        <CourseCard  refresh={refreshCourses}></CourseCard>
         <Button variant="primary" onClick={handleShow}>
             Create Course
         </Button>

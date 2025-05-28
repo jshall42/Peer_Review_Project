@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { NavBar, HomePage, LoginPage, RegistrationPage,
-        ForgotPassword, TeacherView, StudentView, CourseDashboard,
+        ForgotPassword, TeacherView, CourseDashboard,
         EnrollmentTab} from './components'
 
 function App() {
@@ -25,7 +25,7 @@ function App() {
           </Route>
 
           {/*Student Routes */}
-          <Route path="/student" element={<StudentView />} />
+          {/* <Route path="/student" element={<StudentView />} /> */}
         </Routes>
       </div>
     </Router>

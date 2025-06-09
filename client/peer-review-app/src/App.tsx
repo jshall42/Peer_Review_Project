@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { NavBar, HomePage, LoginPage, RegistrationPage,
         ForgotPassword, TeacherView, CourseDashboard,
-        EnrollmentTab} from './components'
+        EnrollmentTab, AssessmentTab} from './components'
 
 function App() {
   return (
@@ -19,7 +19,7 @@ function App() {
           <Route path="/teacher" element={<TeacherView />} />
           <Route path="/course/:id/*" element={<CourseDashboard />}>
             <Route path="enrollment" element={<EnrollmentTab />} />
-            <Route path="assesment" element={<EnrollmentTab />} />
+            <Route path="assessment" element={<AssessmentTab />} />
             <Route path="feedback" element={<EnrollmentTab />} />
             <Route index element={<EnrollmentTab />} />
           </Route>

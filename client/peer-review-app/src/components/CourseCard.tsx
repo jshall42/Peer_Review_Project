@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import Swal from "sweetalert2"
 
+// Course Object and its info that it holds
 interface Course {
     coursename: string
     coursenumber: string
@@ -13,9 +14,10 @@ interface Course {
 
 function CourseCard({ refresh }: { refresh: boolean }) {
     const navigate = useNavigate()
+    // useState with an array of Course Objs
     const [courses, setCourses] = useState<Course[]>([])
 
-
+    // Gets courses from db and sends back to be displayed and refreshes after adding course (Will add deleting course at later date)
     useEffect(() => {
         const userEmail = sessionStorage.getItem("userEmail")
         if (!userEmail) {
@@ -46,6 +48,7 @@ function CourseCard({ refresh }: { refresh: boolean }) {
         fetchCourses()
     }, [refresh])
 
+    // When pressing on a course it will send you to that courses page(student and teacher have different views), and sends id for backend tracking
     const openDashboard = (id:string) => {
         navigate(`/course/${id}/*`)
     }

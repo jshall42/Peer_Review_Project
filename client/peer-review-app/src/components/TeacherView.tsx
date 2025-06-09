@@ -23,7 +23,7 @@ function TeacherView(){
         setValidated(true)
 
         const formData = new FormData(form)
-
+        // getting the course data from the form
         const courseData = {
             courseName: formData.get("courseName") as string,
             courseNumber: formData.get("courseNumber") as string,
@@ -51,6 +51,7 @@ function TeacherView(){
                         icon: "success",
                         allowOutsideClick: false,
                         confirmButtonText: "Continue"
+                        // adds the course data and refreshes the data so that the new course will show to user
                     }).then(result => {
                         if(result.isConfirmed){
                             setRefreshCourses(prev => !prev)
